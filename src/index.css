@@ -1,0 +1,70 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  /* ── Surfaces ── */
+  --cream:          #F7F5F0;   /* page background */
+  --cream-dark:     #E6E1D6;   /* borders & dividers */
+  --cream-card:     #FFFFFF;   /* card surface */
+
+  /* ── Terracotta — muted, for errors & warming accents ── */
+  --terra:          #A84830;
+  --terra-light:    #C0634A;
+  --terra-pale:     #F2EAE6;
+
+  /* ── Forest green — primary brand color ── */
+  --olive:          #1E3D2A;
+  --olive-light:    #2E5C3E;
+  --olive-pale:     #E8F0EB;
+
+  /* ── Champagne gold ── */
+  --mustard:        #9A7828;
+  --mustard-pale:   #F4EFE3;
+
+  /* ── Editorial text ── */
+  --brown:          #18150D;   /* near charcoal — headings & primary text */
+  --brown-mid:      #6B5E50;   /* warm gray — secondary text */
+
+  /* ── Misc ── */
+  --sage:           #7A9A80;
+  --gold:           #A87E30;
+  --blush:          #EDE7DC;
+
+  /* ── Typography ── */
+  --font-display:   'Playfair Display', Georgia, serif;
+  --font-serif:     'Playfair Display', Georgia, serif;
+  --font-body:      'Inter', system-ui, sans-serif;
+
+  /* ── Geometry ── */
+  --radius-sm:  6px;
+  --radius:     12px;
+  --radius-lg:  20px;
+
+  /* ── Elevation ── */
+  --shadow-sm:  0 1px 2px rgba(0,0,0,0.04), 0 3px 10px rgba(0,0,0,0.05);
+  --shadow:     0 2px 6px rgba(0,0,0,0.04), 0 8px 28px rgba(0,0,0,0.08);
+  --shadow-lg:  0 4px 12px rgba(0,0,0,0.05), 0 20px 56px rgba(0,0,0,0.12);
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--cream);
+  color: var(--brown);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 5rem;
+}
+
+::selection {
+  background: var(--olive-pale);
+  color: var(--olive);
+}

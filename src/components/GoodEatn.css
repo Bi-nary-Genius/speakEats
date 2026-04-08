@@ -1,0 +1,175 @@
+.goodeatn {
+  background: var(--cream-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--cream-dark);
+  box-shadow: var(--shadow);
+  padding: 1.75rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Thin top accent */
+.goodeatn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--olive);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  opacity: 0.3;
+}
+
+/* ── Header ── */
+.goodeatn-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.goodeatn-title {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  line-height: 1;
+}
+
+.goodeatn-good {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1.1rem;
+  color: var(--brown-mid);
+  opacity: 0.7;
+}
+
+.goodeatn-eatn {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 2rem;
+  color: var(--olive);
+  letter-spacing: -0.02em;
+}
+
+.goodeatn-count {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--brown-mid);
+  opacity: 0.5;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ── Empty state ── */
+.goodeatn-empty {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 0.875rem;
+  color: var(--brown-mid);
+  opacity: 0.6;
+  text-align: center;
+  padding: 1rem 0;
+  line-height: 1.6;
+}
+
+/* ── List ── */
+.goodeatn-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.goodeatn-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: var(--radius-sm);
+  background: var(--cream);
+  border: 1px solid var(--cream-dark);
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+
+.goodeatn-item:hover {
+  border-color: var(--olive-pale);
+  background: var(--cream-card);
+  box-shadow: var(--shadow-sm);
+}
+
+.goodeatn-emoji {
+  font-size: 1.4rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.goodeatn-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.goodeatn-name {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--brown);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.goodeatn-note {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 0.72rem;
+  color: var(--brown-mid);
+  opacity: 0.7;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.goodeatn-reaction-label {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  color: var(--brown-mid);
+  opacity: 0.55;
+}
+
+/* ── Remove button ── */
+.goodeatn-remove {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--brown-mid);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s, border-color 0.15s, color 0.15s;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.goodeatn-item:hover .goodeatn-remove { opacity: 1; }
+
+.goodeatn-remove:hover {
+  background: var(--terra-pale);
+  border-color: var(--terra);
+  color: var(--terra);
+}
+
+.goodeatn-unrated {
+  color: var(--olive);
+  opacity: 0.5;
+  font-style: italic;
+}

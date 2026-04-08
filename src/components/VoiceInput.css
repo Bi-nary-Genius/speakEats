@@ -1,0 +1,286 @@
+.voice-card {
+  background: var(--cream-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--cream-dark);
+  box-shadow: var(--shadow);
+  padding: 2.25rem 1.75rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Hairline top accent */
+.voice-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--olive-light), transparent);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.voice-card--active {
+  border-color: var(--olive-pale);
+  box-shadow: var(--shadow), 0 0 0 3px var(--olive-pale);
+}
+
+/* ── Helper text ── */
+.voice-helper-text {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  color: var(--brown-mid);
+  opacity: 0.55;
+  text-align: center;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+/* ── Mic section ── */
+.voice-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.1rem;
+  width: 100%;
+}
+
+.mic-btn {
+  position: relative;
+  width: 116px;
+  height: 116px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  background: radial-gradient(circle at 38% 32%, #2E5C3E, var(--olive));
+  box-shadow:
+    0 6px 24px rgba(30,61,42,0.35),
+    inset 0 1px 0 rgba(255,255,255,0.15),
+    inset 0 -2px 6px rgba(0,0,0,0.12);
+  transition: transform 0.15s, box-shadow 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mic-btn:hover {
+  transform: scale(1.05);
+  box-shadow:
+    0 10px 32px rgba(30,61,42,0.42),
+    inset 0 1px 0 rgba(255,255,255,0.15);
+}
+
+.mic-btn.listening {
+  background: radial-gradient(circle at 38% 32%, #A87E30, var(--mustard));
+  box-shadow:
+    0 6px 24px rgba(154,120,40,0.45),
+    inset 0 1px 0 rgba(255,255,255,0.15);
+}
+
+.mic-icon-wrap {
+  position: relative;
+  z-index: 2;
+  color: white;
+}
+
+.mic-svg {
+  width: 30px;
+  height: 30px;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.18));
+}
+
+/* ── Ripple rings ── */
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  border: 1.5px solid var(--olive-light);
+  animation: ripple-out 1.8s ease-out infinite;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.ripple-1 { width: 120%; height: 120%; animation-delay: 0s;   }
+.ripple-2 { width: 150%; height: 150%; animation-delay: 0.5s; }
+.ripple-3 { width: 180%; height: 180%; animation-delay: 1s;   }
+
+@keyframes ripple-out {
+  0%   { transform: scale(0.8); opacity: 0.5; }
+  100% { transform: scale(1);   opacity: 0;   }
+}
+
+/* ── Labels ── */
+.mic-label {
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+}
+
+.mic-label--idle   { color: var(--brown-mid); opacity: 0.65; }
+
+.mic-label--active {
+  color: var(--mustard);
+  font-weight: 600;
+  animation: label-pulse 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes label-pulse {
+  from { opacity: 0.65; }
+  to   { opacity: 1; }
+}
+
+.voice-hint {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 0.78rem;
+  color: var(--brown-mid);
+  opacity: 0.55;
+  text-align: center;
+  letter-spacing: 0.01em;
+}
+
+/* ── Transcript strip ── */
+.transcript-strip {
+  margin-top: 1.25rem;
+  width: 100%;
+  background: var(--olive-pale);
+  border: 1px solid rgba(30,61,42,0.12);
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 1rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--brown);
+  line-height: 1.5;
+}
+
+.transcript-ear  { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+.transcript-text { font-style: italic; color: var(--brown-mid); }
+
+/* ── Or divider ── */
+.or-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  margin: 1.75rem 0 1.25rem;
+}
+
+.or-divider-line {
+  flex: 1;
+  height: 1px;
+  background: var(--cream-dark);
+}
+
+.or-divider-text {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--brown-mid);
+  opacity: 0.5;
+  white-space: nowrap;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ── Text input row ── */
+.text-row {
+  display: flex;
+  width: 100%;
+  gap: 0;
+}
+
+.text-ingredient-input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  background: var(--cream);
+  border: 1px solid var(--cream-dark);
+  border-right: none;
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  color: var(--brown);
+  transition: border-color 0.15s;
+  min-width: 0;
+}
+
+.text-ingredient-input::placeholder {
+  color: var(--brown-mid);
+  opacity: 0.4;
+}
+
+.text-ingredient-input:focus {
+  outline: none;
+  border-color: var(--olive-light);
+}
+
+.text-row:focus-within .text-add-btn {
+  border-color: var(--olive-light);
+}
+
+.text-add-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  flex-shrink: 0;
+  background: var(--olive);
+  color: white;
+  border: 1px solid var(--olive);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.text-add-btn:hover:not(:disabled) {
+  background: var(--olive-light);
+  border-color: var(--olive-light);
+}
+
+.text-add-btn:disabled {
+  background: var(--cream-dark);
+  border-color: var(--cream-dark);
+  color: var(--brown-mid);
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Unsupported fallback ── */
+.unsupported-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+}
+
+.unsupported-lead {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--brown);
+  letter-spacing: -0.01em;
+  margin-bottom: 0.1rem;
+}
+
+.unsupported-sub {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 0.82rem;
+  color: var(--brown-mid);
+  opacity: 0.6;
+  margin-bottom: 0.75rem;
+}
+
+.unsupported-note {
+  margin-top: 0.9rem;
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  color: var(--brown-mid);
+  opacity: 0.4;
+  text-align: center;
+}

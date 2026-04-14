@@ -107,8 +107,10 @@ export default function RecipeModal({ meal, userIngredients, savedMeal, onSave, 
     onUpdate(meal.name, { reaction: next })
   }
 
-  function handleSaveNote() {
-    onUpdate(meal.name, { note: note.trim() })
+  function handleNoteBlur() {
+    if (note.trim() !== (savedMeal?.note ?? '')) {
+      onUpdate(meal.name, { note: note.trim() })
+    }
   }
 
   function handleRemove() {
@@ -118,8 +120,7 @@ export default function RecipeModal({ meal, userIngredients, savedMeal, onSave, 
     setNote('')
   }
 
-  const alreadySaved   = saveState === 'saved'
-  const noteIsDirty    = note.trim() !== (savedMeal?.note ?? '')
+  const alreadySaved = saveState === 'saved'
 
   return (
     <div className="rm-backdrop" onClick={onClose} role="dialog" aria-modal="true" aria-label={`Recipe for ${meal.name}`}>
@@ -231,14 +232,10 @@ export default function RecipeModal({ meal, userIngredients, savedMeal, onSave, 
                   placeholder="add a personal note... (optional)"
                   value={note}
                   onChange={e => setNote(e.target.value)}
+                  onBlur={handleNoteBlur}
                   maxLength={200}
                   rows={2}
                 />
-                {noteIsDirty && (
-                  <button className="rm-note-save-btn" onClick={handleSaveNote}>
-                    Save note
-                  </button>
-                )}
               </div>
             </div>
           ) : (

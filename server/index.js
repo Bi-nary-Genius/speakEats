@@ -6,6 +6,35 @@ app.use(express.json())
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
+// ── Input sanitization helpers ─────────────────────────────────────────────
+
+const MAX_STRING      = 500
+const MAX_INGREDIENTS = 20
+
+// Strip control characters and common prompt-injection patterns.
+// Removes: ASCII control chars, null bytes, and sequences that attempt
+// to break out of the prompt context (role prefixes, instruction overrides).
+function sanitizeString(val) {
+  if (typeof val !== 'string') return ''
+  return val
+    .replace(/[\x00-\x1F\x7F]/g, ' ')           // control characters → space
+    .replace(/\b(ignore|disregard|forget)\b.{0,60}(above|previous|instruction|prompt)/gi, '')
+    .replace(/[-]{3,}|[=]{3,}/g, '')              // --- / === prompt delimiters
+    .trim()
+    .slice(0, MAX_STRING)
+}
+
+// Validate and sanitize an ingredients array.
+// Returns { items, error } — error is a string if validation fails.
+function sanitizeIngredients(raw) {
+  if (!Array.isArray(raw)) return { items: null, error: 'ingredients must be an array' }
+  if (raw.length > MAX_INGREDIENTS) {
+    return { items: null, error: `Too many ingredients — maximum is ${MAX_INGREDIENTS}` }
+  }
+  const items = raw.map(sanitizeString).filter(s => s.length > 0)
+  return { items, error: null }
+}
+
 // Extracts and parses JSON from a Claude response that may be wrapped
 // in markdown code fences and may contain trailing commas.
 function parseClaudeJSON(text, rootType = 'object') {
@@ -21,21 +50,30 @@ function parseClaudeJSON(text, rootType = 'object') {
 
 app.post('/api/suggest', async (req, res) => {
   const { ingredients, mood } = req.body
-  if (!ingredients || ingredients.length === 0) {
+
+  const { items: cleanIngredients, error: ingError } = sanitizeIngredients(ingredients)
+  if (ingError) return res.status(400).json({ error: ingError })
+  if (!cleanIngredients || cleanIngredients.length === 0) {
     return res.status(400).json({ error: 'No ingredients provided' })
   }
 
+  const cleanMood = mood ? {
+    cuisine: sanitizeString(mood.cuisine ?? ''),
+    time:    sanitizeString(mood.time    ?? ''),
+    hunger:  sanitizeString(mood.hunger  ?? ''),
+  } : null
+
   // Build optional mood context string
-  const moodLines = mood ? [
-    mood.cuisine && `Cuisine preference: ${mood.cuisine}`,
-    mood.time    && `Time available: ${mood.time}`,
-    mood.hunger  && `Hunger level: ${mood.hunger}`,
+  const moodLines = cleanMood ? [
+    cleanMood.cuisine && `Cuisine preference: ${cleanMood.cuisine}`,
+    cleanMood.time    && `Time available: ${cleanMood.time}`,
+    cleanMood.hunger  && `Hunger level: ${cleanMood.hunger}`,
   ].filter(Boolean) : []
   const moodContext = moodLines.length
     ? `\nThe user is also in the mood for:\n${moodLines.join('\n')}\nPrioritize suggestions that match these preferences.`
     : ''
 
-  const prompt = `You are a helpful chef. A user has these ingredients: ${ingredients.join(', ')}.${moodContext}
+  const prompt = `You are a helpful chef. A user has these ingredients: ${cleanIngredients.join(', ')}.${moodContext}
 
 Suggest 4 meal ideas they can make. For each meal, respond with a JSON array (no markdown, just raw JSON) like this:
 [
@@ -67,14 +105,21 @@ Keep missingIngredients to at most 3 items — only truly essential things. If t
 
 app.post('/api/recipe', async (req, res) => {
   const { mealName, description, userIngredients } = req.body
-  if (!mealName) return res.status(400).json({ error: 'No meal name provided' })
 
-  const ingredientContext = userIngredients?.length
-    ? `The user has these ingredients on hand: ${userIngredients.join(', ')}.`
+  const cleanName = sanitizeString(mealName ?? '')
+  if (!cleanName) return res.status(400).json({ error: 'No meal name provided' })
+
+  const cleanDescription = sanitizeString(description ?? '')
+
+  const { items: cleanIngredients, error: ingError } = sanitizeIngredients(userIngredients ?? [])
+  if (ingError) return res.status(400).json({ error: ingError })
+
+  const ingredientContext = cleanIngredients?.length
+    ? `The user has these ingredients on hand: ${cleanIngredients.join(', ')}.`
     : ''
 
-  const prompt = `You are a helpful chef. Write a full recipe for: "${mealName}"
-Description: "${description || ''}"
+  const prompt = `You are a helpful chef. Write a full recipe for: "${cleanName}"
+Description: "${cleanDescription}"
 ${ingredientContext}
 
 Return ONLY raw JSON (no markdown, no code fences), exactly this shape:
@@ -114,9 +159,11 @@ Use the user's available ingredients where possible. Give realistic amounts. 6�
 
 app.post('/api/health', async (req, res) => {
   const { ingredient } = req.body
-  if (!ingredient) return res.status(400).json({ error: 'No ingredient provided' })
 
-  const prompt = `You are a friendly nutrition expert. Give key health benefits for: "${ingredient}"
+  const cleanIngredient = sanitizeString(ingredient ?? '')
+  if (!cleanIngredient) return res.status(400).json({ error: 'No ingredient provided' })
+
+  const prompt = `You are a friendly nutrition expert. Give key health benefits for: "${cleanIngredient}"
 
 Return ONLY raw JSON (no markdown, no code fences), exactly this shape:
 {
@@ -158,14 +205,25 @@ app.post('/api/struggle', async (req, res) => {
   const { budget, period, staples, zipCode } = req.body
   if (!budget || !period) return res.status(400).json({ error: 'Budget and period are required' })
 
+  const cleanPeriod = ['daily', 'weekly', 'monthly'].includes(period) ? period : null
+  if (!cleanPeriod) return res.status(400).json({ error: 'Invalid period — must be daily, weekly, or monthly' })
+
+  const budgetNum = parseFloat(budget)
+  if (isNaN(budgetNum) || budgetNum <= 0 || budgetNum > 100000) {
+    return res.status(400).json({ error: 'Invalid budget amount' })
+  }
+
+  const cleanStaples = sanitizeString(staples  ?? '')
+  const cleanZipCode = sanitizeString(zipCode   ?? '').replace(/[^0-9\- ]/g, '').slice(0, 10)
+
   const prompt = `You are the Struggle Meal Wizard — a supportive, funny best friend who is AMAZING at making grocery budgets work. Your tone is warm, slightly irreverent, never condescending. Think: texting a friend who happens to know everything about budget cooking.
 
 The user has:
-- Budget: $${budget} per ${period}
-- Must-have staples: ${staples?.trim() || 'nothing specific, surprise them'}
-- Near zip code: ${zipCode || 'somewhere in the US'}
+- Budget: $${budgetNum} per ${cleanPeriod}
+- Must-have staples: ${cleanStaples || 'nothing specific, surprise them'}
+- Near zip code: ${cleanZipCode || 'somewhere in the US'}
 
-Create an optimized grocery list that fits WITHIN their ${period} budget of $${budget}.
+Create an optimized grocery list that fits WITHIN their ${cleanPeriod} budget of $${budgetNum}.
 
 Return ONLY raw JSON (no markdown, no code fences), exactly this shape:
 {

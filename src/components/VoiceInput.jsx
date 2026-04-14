@@ -6,6 +6,7 @@ export default function VoiceInput({ onIngredientsDetected }) {
   const [transcript, setTranscript] = useState('')
   const [supported,  setSupported]  = useState(true)
   const [inputVal,   setInputVal]   = useState('')
+  const [micError,   setMicError]   = useState(null)
   const recognitionRef = useRef(null)
   const textInputRef   = useRef(null)
 
@@ -36,7 +37,19 @@ export default function VoiceInput({ onIngredientsDetected }) {
       }
     }
 
-    recognition.onerror = () => setListening(false)
+    recognition.onerror = (event) => {
+      setListening(false)
+      const messages = {
+        'not-allowed':       'Microphone access was denied. Please allow microphone access in your browser settings.',
+        'permission-denied': 'Microphone access was denied. Please allow microphone access in your browser settings.',
+        'no-speech':         'No speech was detected. Please try again.',
+        'audio-capture':     'No microphone was found. Please check that one is connected.',
+        'network':           'A network error occurred. Please check your connection and try again.',
+        'aborted':           null, // user stopped intentionally — no message
+      }
+      const msg = messages[event.error] ?? 'Something went wrong with the microphone. Please try again.'
+      if (msg) setMicError(msg)
+    }
     recognition.onend   = () => setListening(false)
     recognitionRef.current = recognition
   }, [onIngredientsDetected])
@@ -57,6 +70,7 @@ export default function VoiceInput({ onIngredientsDetected }) {
       setListening(false)
     } else {
       setTranscript('')
+      setMicError(null)
       recognitionRef.current.start()
       setListening(true)
     }
@@ -158,6 +172,10 @@ export default function VoiceInput({ onIngredientsDetected }) {
           <span className="transcript-ear">🎤</span>
           <span className="transcript-text">{transcript}</span>
         </div>
+      )}
+
+      {micError && (
+        <p className="mic-error" role="alert">{micError}</p>
       )}
 
       {/* ── Divider ── */}

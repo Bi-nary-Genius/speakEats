@@ -284,3 +284,16 @@
   opacity: 0.4;
   text-align: center;
 }
+
+.mic-error {
+  margin: 0.5rem 0 0.25rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: var(--radius-sm, 8px);
+  background: #fff3f3;
+  border: 1px solid #f5c2c2;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  color: #8b2e2e;
+  text-align: center;
+  line-height: 1.4;
+}

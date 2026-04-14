@@ -1,5 +1,12 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './StruggleMealWizard.css'
+
+const SMW_KEY = 'smw-state'
+
+function loadSmwState() {
+  try { return JSON.parse(sessionStorage.getItem(SMW_KEY)) ?? {} }
+  catch { return {} }
+}
 
 const PERIODS = [
   { value: 'daily',   label: '/ day'   },
@@ -13,13 +20,20 @@ function mapsLink(storeName, zipCode) {
 }
 
 export default function StruggleMealWizard() {
-  const [budget,  setBudget]  = useState('')
-  const [period,  setPeriod]  = useState('weekly')
-  const [staples, setStaples] = useState('')
-  const [zipCode, setZipCode] = useState('')
-  const [result,  setResult]  = useState(null)
+  const initial = loadSmwState()
+  const [budget,  setBudget]  = useState(initial.budget  ?? '')
+  const [period,  setPeriod]  = useState(initial.period  ?? 'weekly')
+  const [staples, setStaples] = useState(initial.staples ?? '')
+  const [zipCode, setZipCode] = useState(initial.zipCode ?? '')
+  const [result,  setResult]  = useState(initial.result  ?? null)
   const [loading, setLoading] = useState(false)
   const [error,   setError]   = useState(null)
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(SMW_KEY, JSON.stringify({ budget, period, staples, zipCode, result }))
+    } catch { /* quota exceeded */ }
+  }, [budget, period, staples, zipCode, result])
 
   async function handleSubmit(e) {
     e.preventDefault()

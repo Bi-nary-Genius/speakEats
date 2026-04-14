@@ -40,6 +40,32 @@ function playClink() {
 // Session cache so re-opening the same meal is instant
 const recipeCache = new Map()
 
+// Persistent recipe cache — survives page reloads for saved meals
+const LS_RECIPE_KEY = 'speakeats-recipe-cache'
+
+function getStoredRecipe(mealName) {
+  try {
+    const cache = JSON.parse(localStorage.getItem(LS_RECIPE_KEY)) ?? {}
+    return cache[mealName] ?? null
+  } catch { return null }
+}
+
+function storeRecipe(mealName, recipe) {
+  try {
+    const cache = JSON.parse(localStorage.getItem(LS_RECIPE_KEY)) ?? {}
+    cache[mealName] = recipe
+    localStorage.setItem(LS_RECIPE_KEY, JSON.stringify(cache))
+  } catch { /* storage full or unavailable */ }
+}
+
+function removeStoredRecipe(mealName) {
+  try {
+    const cache = JSON.parse(localStorage.getItem(LS_RECIPE_KEY)) ?? {}
+    delete cache[mealName]
+    localStorage.setItem(LS_RECIPE_KEY, JSON.stringify(cache))
+  } catch { /* silent */ }
+}
+
 export default function RecipeModal({ meal, userIngredients, savedMeal, onSave, onRemove, onUpdate, onClose }) {
   const [recipe,    setRecipe]    = useState(null)
   const [loading,   setLoading]   = useState(true)
@@ -66,6 +92,14 @@ export default function RecipeModal({ meal, userIngredients, savedMeal, onSave, 
   useEffect(() => {
     if (recipeCache.has(meal.name)) {
       setRecipe(recipeCache.get(meal.name))
+      setLoading(false)
+      return
+    }
+
+    const stored = getStoredRecipe(meal.name)
+    if (stored) {
+      recipeCache.set(meal.name, stored)
+      setRecipe(stored)
       setLoading(false)
       return
     }
@@ -98,6 +132,7 @@ export default function RecipeModal({ meal, userIngredients, savedMeal, onSave, 
     playClink()
     onSave({ ...meal, savedAt: new Date().toISOString() })
     setSaveState('saved')
+    if (recipe) storeRecipe(meal.name, recipe)
   }
 
   function handleReactionClick(r) {
@@ -118,6 +153,7 @@ export default function RecipeModal({ meal, userIngredients, savedMeal, onSave, 
     setSaveState('idle')
     setReaction(null)
     setNote('')
+    removeStoredRecipe(meal.name)
   }
 
   const alreadySaved = saveState === 'saved'
